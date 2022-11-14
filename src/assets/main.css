@@ -39,7 +39,7 @@ h1.site-title {
 .gpi-preview-area,
 .gpi-hex,
 .gpi-saved-button,
-.gpi-saved-colors,
+.gpi-saved-gradients,
 .gpi-generated-code {
   margin-top: 30px;
 }
@@ -377,12 +377,12 @@ h1.site-title {
     background-color: #e81cff;
 }
 
-.gpi-saved-colors {
+.gpi-saved-gradients {
     text-align: left;
     border-top: solid 1px #edeff1;
 }
 
-.gpi-saved-colors p,
+.gpi-saved-gradients p,
 .gpi-generated-code p {
     font-family: Roboto;
     font-style: normal;
@@ -393,14 +393,14 @@ h1.site-title {
     margin-top: 30px;
 }
 
-.gpi-saved-colors .saved-item {
+.gpi-saved-gradients .saved-item {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     background-color: #eaeaea;
 }
 
-.gpi-saved-colors .saved-items {
+.gpi-saved-gradients .saved-items {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
