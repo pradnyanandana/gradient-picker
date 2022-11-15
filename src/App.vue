@@ -7,15 +7,13 @@ import { useMainStore } from "./stores/gradient";
 import "prismjs/themes/prism.css";
 
 export default {
-  mounted() {
-    window.Prism = window.Prism || {};
-    window.Prism.manual = true;
-
-    Prism.highlightAll();
-    Prism.hooks.add("before-sanity-check", (env) => {
-      env.element.innerHTML = env.element.innerHTML.replace(/<br>/g, "\n");
-      env.code = env.element.textContent;
-    });
+  data: () => {
+    return {
+      alphaLeft: 100,
+      hueLeft: 100,
+      pickerTop: 100,
+      pickerLeft: 0,
+    };
   },
   setup() {
     const main = useMainStore();
@@ -23,7 +21,16 @@ export default {
       JSON.stringify(computed(() => main.getAllGradients).value)
     );
 
-    const gradient = gradients[0] || {};
+    const gradient = gradients[0] || {
+      type: "linear",
+      lineardegree: 90,
+      radialposition: "center center",
+      colors: [
+        { hex: "#40c9ff", stop: 0 },
+        { hex: "#e81cff", stop: 100 },
+      ],
+    };
+
     const color = gradient.colors?.[0]?.hex || "#40c9ff";
     const addGradient = () => {};
 
@@ -33,7 +40,146 @@ export default {
       gradients,
       addGradient,
       removeGradient: main.removeGradient,
+      isEmpty: computed(() => main.isEmpty),
     };
+  },
+  mounted() {
+    window.Prism = window.Prism || {};
+    window.Prism.manual = true;
+
+    Prism.highlightAll();
+    Prism.hooks.add("before-sanity-check", (env) => {
+      env.element.innerHTML = env.element.innerHTML.replace(/<br>/g, "\n");
+      env.code = env.element.textContent;
+    });
+
+    try {
+      const area = 100 / 6;
+      const obj = this.hexToRgb(this.color);
+      const alpha = obj.alpha !== undefined ? obj.alpha * 100 : 100;
+      const rgb = Object.keys(obj)
+        .filter((key) => ["r", "g", "b"].includes(key))
+        .reduce((fil, key) => {
+          fil[key] = obj[key];
+          return fil;
+        }, {});
+
+      const maxI = Object.keys(rgb).reduce((a, b) =>
+        rgb[a] >= rgb[b] ? a : b
+      );
+      const minI = Object.keys(rgb).reduce((a, b) =>
+        rgb[a] <= rgb[b] ? a : b
+      );
+
+      this.red = rgb.r;
+      this.green = rgb.g;
+      this.blue = rgb.b;
+      this.alpha = alpha;
+
+      if (rgb.r === rgb.g && rgb.r === rgb.b) {
+        // minI = minG, r, g, b has same value 255
+        this.hueArea = 6;
+        this.pickerBackgroundRed = 255;
+        this.pickerBackgroundGreen = 0;
+        this.pickerBackgroundBlue = 0;
+      } else {
+        if (maxI === "r") {
+          this.pickerTop = 100 - (rgb.r / 255) * 100;
+
+          if (minI === "g") {
+            this.hueArea = 6;
+
+            this.hueLeft =
+              5 * (100 / 6) +
+              (100 / 6 -
+                ((rgb.b - rgb[minI]) / (rgb[maxI] - rgb[minI])) * (100 / 6));
+            this.pickerLeft = 100 - (rgb.g / rgb.r) * 100;
+
+            this.pickerBackgroundRed = 255;
+            this.pickerBackgroundGreen = 0;
+            this.pickerBackgroundBlue = Math.round(
+              255 - ((this.hueLeft - 5 * area) / area) * 255
+            );
+          } else if (minI === "b") {
+            this.hueArea = 1;
+
+            this.hueLeft =
+              ((rgb.g - rgb[minI]) / (rgb[maxI] - rgb[minI])) * (100 / 6);
+            this.pickerLeft = 100 - (rgb.b / rgb.r) * 100;
+
+            this.pickerBackgroundRed = 255;
+            this.pickerBackgroundGreen = Math.round(
+              (this.hueLeft / area) * 255
+            );
+            this.pickerBackgroundBlue = 0;
+          }
+        } else if (maxI === "g") {
+          this.pickerTop = 100 - (rgb.g / 255) * 100;
+
+          if (minI === "r") {
+            this.hueArea = 3;
+
+            this.hueLeft =
+              2 * (100 / 6) +
+              ((rgb.b - rgb[minI]) / (rgb[maxI] - rgb[minI])) * (100 / 6);
+            this.pickerLeft = 100 - (rgb.r / rgb.g) * 100;
+
+            this.pickerBackgroundRed = 0;
+            this.pickerBackgroundGreen = 255;
+            this.pickerBackgroundBlue = Math.round(
+              ((this.hueLeft - 2 * area) / area) * 255
+            );
+          } else if (minI === "b") {
+            this.hueArea = 2;
+
+            this.hueLeft =
+              100 / 6 +
+              (100 / 6 -
+                ((rgb.r - rgb[minI]) / (rgb[maxI] - rgb[minI])) * (100 / 6));
+            this.pickerLeft = 100 - (rgb.b / rgb.g) * 100;
+
+            this.pickerBackgroundRed = Math.round(
+              255 - ((this.hueLeft - area) / area) * 255
+            );
+            this.pickerBackgroundGreen = 255;
+            this.pickerBackgroundBlue = 0;
+          }
+        } else if (maxI === "b") {
+          this.pickerTop = 100 - (rgb.b / 255) * 100;
+
+          if (minI === "r") {
+            this.hueArea = 4;
+
+            this.hueLeft =
+              3 * (100 / 6) +
+              (100 / 6 -
+                ((rgb.g - rgb[minI]) / (rgb[maxI] - rgb[minI])) * (100 / 6));
+            this.pickerLeft = 100 - (rgb.r / rgb.b) * 100;
+
+            this.pickerBackgroundRed = 0;
+            this.pickerBackgroundGreen = Math.round(
+              255 - ((this.hueLeft - 3 * area) / area) * 255
+            );
+            this.pickerBackgroundBlue = 255;
+          } else if (minI === "g") {
+            this.hueArea = 5;
+
+            this.hueLeft =
+              4 * (100 / 6) +
+              ((rgb.r - rgb[minI]) / (rgb[maxI] - rgb[minI])) * (100 / 6);
+            this.pickerLeft = 100 - (rgb.g / rgb.b) * 100;
+
+            this.pickerBackgroundRed = Math.round(
+              ((this.hueLeft - 4 * area) / area) * 255
+            );
+            this.pickerBackgroundGreen = 0;
+            this.pickerBackgroundBlue = 255;
+          }
+        }
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
   },
   methods: {
     hexToRgb(hex) {
@@ -115,7 +261,10 @@ export default {
         </div>
       </div>
       <div class="gpi-picker" :style="`background: ${color}`">
-        <div class="pointer"></div>
+        <div
+          class="pointer"
+          :style="`top: calc(${pickerTop}% - 5px); left: calc(${pickerLeft}% - 5px)`"
+        ></div>
         <div class="bg1"></div>
         <div class="bg2"></div>
       </div>
@@ -129,10 +278,13 @@ export default {
         </div>
         <div class="gpi-hue-alpha">
           <div class="gpi-hue">
-            <div class="pointer"></div>
+            <div class="pointer" :style="`left: calc(${hueLeft}% - 7px)`"></div>
           </div>
           <div class="gpi-alpha">
-            <div class="pointer"></div>
+            <div
+              class="pointer"
+              :style="`left: calc(${alphaLeft}% - 7px)`"
+            ></div>
             <div
               class="bg"
               :style="`background-image: linear-gradient(
@@ -160,7 +312,7 @@ export default {
       </div>
       <div class="gpi-saved-gradients">
         <p>Saved Gradients</p>
-        <div class="saved-items">
+        <div v-if="!isEmpty" class="saved-items">
           <div
             v-for="(gradient, index) in gradients"
             :key="index"
@@ -168,6 +320,7 @@ export default {
             :style="`background: ${buildCode(gradient)};`"
           ></div>
         </div>
+        <p v-else class="saved-items not-found">No gradient found</p>
       </div>
       <div class="gpi-generated-code">
         <p>Generated Code</p>

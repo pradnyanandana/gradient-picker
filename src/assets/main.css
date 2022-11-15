@@ -393,6 +393,12 @@ h1.site-title {
     margin-top: 30px;
 }
 
+.gpi-saved-gradients p.not-found {
+    font-size: 12px;
+    color: #ababab;
+    text-transform: capitalize;
+}
+
 .gpi-saved-gradients .saved-item {
     width: 30px;
     height: 30px;
