@@ -261,7 +261,7 @@ h1.site-title {
 
 .gpi-gradient .gpi-gradient-bar .pointer {
   position: absolute;
-  bottom: calc(100% + 5px);
+  bottom: calc(100% + 7px);
   left: calc(0% - 10px);
   width: 20px;
   height: 20px;
@@ -281,8 +281,7 @@ h1.site-title {
   z-index: 2;
 }
 
-.gpi-gradient .gpi-gradient-bar .pointer.active .pointer-arrow,
-.gpi-gradient .gpi-gradient-bar .pointer.active .pointer-arrow-inner {
+.gpi-gradient .gpi-gradient-bar .pointer.active .pointer-arrow {
   border-top-color: #39475c;
 }
 
@@ -314,30 +313,16 @@ h1.site-title {
 
 .gpi-gradient .gpi-gradient-bar .pointer-arrow {
   left: 50%;
-  top: calc(100% + 1px);
-  width: 5px;
-  height: 5px;
-  transform: translateX(-50%);
-  overflow: hidden;
-  position: absolute;
-  z-index: 1;
-  border-right: 3px solid transparent;
-  border-top: 5px solid #edeff1;
-  border-left: 3px solid transparent;
-}
-
-.gpi-gradient .gpi-gradient-bar .pointer-arrow-inner {
-  left: 50%;
   top: 100%;
-  width: 2px;
+  width: 0px;
   height: 2px;
   transform: translateX(-50%);
   overflow: hidden;
   position: absolute;
   z-index: 1;
-  border-right: 2px solid transparent;
-  border-top: 4px solid #fff;
-  border-left: 2px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 8px solid #edeff1;
+  border-left: 4px solid transparent;
 }
 
 .gpi-gradient .gpi-gradient-bar-background,
@@ -360,65 +345,65 @@ h1.site-title {
 }
 
 .gpi-saved-button {
-    text-align: left;
+  text-align: left;
 }
 
 .gpi-saved-button button {
-    border: none;
-    color: #fff;
-    padding: 10px 24px;
-    text-transform: uppercase;
-    border-radius: 3px;
-    background-color: #40c9ff;
-    cursor: pointer;
+  border: none;
+  color: #fff;
+  padding: 10px 24px;
+  text-transform: uppercase;
+  border-radius: 3px;
+  background-color: #40c9ff;
+  cursor: pointer;
 }
 
 .gpi-saved-button button:hover {
-    background-color: #e81cff;
+  background-color: #e81cff;
 }
 
 .gpi-saved-gradients {
-    text-align: left;
-    border-top: solid 1px #edeff1;
+  text-align: left;
+  border-top: solid 1px #edeff1;
 }
 
 .gpi-saved-gradients p,
 .gpi-generated-code p {
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: normal;
-    font-size: 14px;
-    text-transform: uppercase;
-    color: #4d596b;
-    margin-top: 30px;
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #4d596b;
+  margin-top: 30px;
 }
 
 .gpi-saved-gradients p.not-found {
-    font-size: 12px;
-    color: #ababab;
-    text-transform: capitalize;
+  font-size: 12px;
+  color: #ababab;
+  text-transform: capitalize;
 }
 
 .gpi-saved-gradients .saved-item {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: #eaeaea;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #eaeaea;
 }
 
 .gpi-saved-gradients .saved-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
 }
 
 .gpi-generated-code {
-    text-align: left;
-    margin-top: 30px;
-    border-top: solid 1px #edeff1;
+  text-align: left;
+  margin-top: 30px;
+  border-top: solid 1px #edeff1;
 }
 
 .gpi-generated-code pre {
-    margin-top: 30px;
+  margin-top: 30px;
 }
