@@ -15,6 +15,9 @@ export default {
       pickerLeft: 0,
       barPointerIndex: 0,
       color: "#fff",
+      pickerBackgroundRed: 255,
+      pickerBackgroundGreen: 0,
+      pickerBackgroundBlue: 0,
       gradient: {
         type: "linear",
         lineardegree: 90,
@@ -139,8 +142,6 @@ export default {
         this.blue = rgb.b;
         this.alpha = alpha;
 
-        this.alphaLeft = this.alpha;
-
         if (rgb.r === rgb.g && rgb.r === rgb.b) {
           // minI = minG, r, g, b has same value 255
           this.hueArea = 6;
@@ -242,14 +243,14 @@ export default {
             }
           }
         }
+
+        this.alphaLeft = alpha;
+        this.$refs.alphaPointer.style.left = `calc(${alpha}% - 7px)`;
       } catch (err) {
         console.log(err.message);
       }
     },
-    onMouseDownHue(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
+    onHueStart() {
       const hue = this.$refs.hue.getBoundingClientRect();
 
       this.hueX = hue.x;
@@ -259,12 +260,26 @@ export default {
       this.rgbMax = Math.max(this.red, this.green, this.blue);
       this.rgbMin = Math.min(this.red, this.green, this.blue);
       this.$refs.hue.classList.add("grabbing");
+    },
+    onMouseDownHue(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.onHueStart();
 
       this.mouseMoveHue(e);
       this.bindMoveHue();
     },
-    mouseMoveHue(e) {
-      const positionX = e.clientX;
+    onTouchStartHue(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.onHueStart();
+
+      this.touchMoveHue(e);
+      this.bindTouchMoveHue();
+    },
+    onHueMove(positionX) {
       const area = 100 / 6;
 
       let hueLeft =
@@ -370,30 +385,54 @@ export default {
 
       this.gradient.colors[this.barPointerIndex].hex = this.color;
     },
+    mouseMoveHue(e) {
+      this.onHueMove(e.clientX);
+    },
+    touchMoveHue(e) {
+      this.onHueMove(e.touches[0].clientX);
+    },
     mouseUpHue() {
       this.$refs.hue.classList.remove("grabbing");
       this.$refs.hue.removeEventListener("mousemove", this.mouseMoveHue);
+    },
+    touchEndHue() {
+      this.$refs.hue.classList.remove("grabbing");
+      this.$refs.hue.removeEventListener("touchmove", this.mouseMoveHue);
     },
     bindMoveHue() {
       this.$refs.hue.addEventListener("mousemove", this.mouseMoveHue);
       this.$refs.hue.addEventListener("mouseup", () => this.mouseUpHue());
     },
-    onMouseDownAlpha(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
+    bindTouchMoveHue() {
+      this.$refs.hue.addEventListener("touchmove", this.touchMoveHue);
+      this.$refs.hue.addEventListener("touchend", () => this.touchEndHue());
+    },
+    onAlphaStart() {
       const alpha = this.$refs.alpha.getBoundingClientRect();
 
       this.alphaX = alpha.x;
       this.alphaWidth = alpha.width;
       this.$refs.alpha.classList.add("grabbing");
+    },
+    onMouseDownAlpha(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.onAlphaStart();
 
       this.mouseMoveAlpha(e);
       this.bindMoveAlpha();
     },
-    mouseMoveAlpha(e) {
-      const positionX = e.clientX;
+    onTouchStartAlpha(e) {
+      e.preventDefault();
+      e.stopPropagation();
 
+      this.onAlphaStart();
+
+      this.touchMoveAlpha(e);
+      this.bindTouchAlpha();
+    },
+    onMoveAlpha(positionX) {
       let alphaLeft =
         ((positionX - this.alphaX) / this.alphaWidth) * 100 +
         (positionX - this.alphaX) / this.alphaWidth;
@@ -418,13 +457,179 @@ export default {
 
       this.gradient.colors[this.barPointerIndex].hex = this.color;
     },
+    mouseMoveAlpha(e) {
+      this.onMoveAlpha(e.clientX);
+    },
+    touchMoveAlpha(e) {
+      this.onMoveAlpha(e.touches[0].clientX);
+    },
     mouseUpAlpha() {
       this.$refs.alpha.classList.remove("grabbing");
       this.$refs.alpha.removeEventListener("mousemove", this.mouseMoveAlpha);
     },
+    touchEndAlpha() {
+      this.$refs.alpha.classList.remove("grabbing");
+      this.$refs.alpha.removeEventListener("touchmove", this.touchMoveAlpha);
+    },
     bindMoveAlpha() {
       this.$refs.alpha.addEventListener("mousemove", this.mouseMoveAlpha);
       this.$refs.alpha.addEventListener("mouseup", () => this.mouseUpAlpha());
+    },
+    bindTouchAlpha() {
+      this.$refs.alpha.addEventListener("touchmove", this.touchMoveAlpha);
+      this.$refs.alpha.addEventListener("touchend", () => this.touchEndAlpha());
+    },
+    onnPickerStart() {
+      const picker = this.$refs.picker.getBoundingClientRect();
+
+      this.pickerX = picker.x;
+      this.pickerY = picker.y;
+      this.pickerWidth = picker.width;
+      this.pickerHeight = picker.height;
+
+      this.$refs.picker.classList.add("grabbing");
+    },
+    onMouseDownPicker(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.onnPickerStart();
+
+      this.mouseMovePicker(e);
+      this.bindMovePicker();
+    },
+    onTouchStartPicker(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.onnPickerStart();
+
+      this.touchMovePicker(e);
+      this.bindTouchPicker();
+    },
+    onMovePicker(positionX, positionY) {
+      let pickerLeft =
+        ((positionX - this.pickerX) / this.pickerWidth) * 100 +
+        (positionX - this.pickerX) / this.pickerWidth;
+      let pickerTop =
+        ((positionY - this.pickerY) / this.pickerHeight) * 100 +
+        (positionY - this.pickerY) / this.pickerHeight;
+
+      if (pickerLeft > 100) {
+        pickerLeft = 100;
+      }
+
+      if (pickerLeft < 0) {
+        pickerLeft = 0;
+      }
+
+      if (pickerTop > 100) {
+        pickerTop = 100;
+      }
+
+      if (pickerTop < 0) {
+        pickerTop = 0;
+      }
+
+      switch (this.hueArea) {
+        case 1:
+          this.red = Math.round(((100 - pickerTop) * 255) / 100);
+          this.green = Math.round(
+            ((100 - pickerTop) *
+              (((100 - pickerLeft) * (255 - this.pickerBackgroundGreen)) / 100 +
+                this.pickerBackgroundGreen)) /
+              100
+          );
+          this.blue = Math.round(((100 - pickerLeft) * this.red) / 100);
+          break;
+        case 2:
+          this.green = Math.round(((100 - pickerTop) * 255) / 100);
+          this.red = Math.round(
+            ((100 - pickerTop) *
+              (((100 - pickerLeft) * (255 - this.pickerBackgroundRed)) / 100 +
+                this.pickerBackgroundRed)) /
+              100
+          );
+          this.blue = Math.round(((100 - pickerLeft) * this.green) / 100);
+          break;
+        case 3:
+          this.green = Math.round(((100 - pickerTop) * 255) / 100);
+          this.blue = Math.round(
+            ((100 - pickerTop) *
+              (((100 - pickerLeft) * (255 - this.pickerBackgroundBlue)) / 100 +
+                this.pickerBackgroundBlue)) /
+              100
+          );
+          this.red = Math.round(((100 - pickerLeft) * this.green) / 100);
+          break;
+        case 4:
+          this.blue = Math.round(((100 - pickerTop) * 255) / 100);
+          this.green = Math.round(
+            ((100 - pickerTop) *
+              (((100 - pickerLeft) * (255 - this.pickerBackgroundGreen)) / 100 +
+                this.pickerBackgroundGreen)) /
+              100
+          );
+          this.red = Math.round(((100 - pickerLeft) * this.blue) / 100);
+          break;
+        case 5:
+          this.blue = Math.round(((100 - pickerTop) * 255) / 100);
+          this.red = Math.round(
+            ((100 - pickerTop) *
+              (((100 - pickerLeft) * (255 - this.pickerBackgroundRed)) / 100 +
+                this.pickerBackgroundRed)) /
+              100
+          );
+          this.green = Math.round(((100 - pickerLeft) * this.blue) / 100);
+          break;
+        case 0:
+        case 6:
+          this.red = Math.round(((100 - pickerTop) * 255) / 100);
+          this.blue = Math.round(
+            ((100 - pickerTop) *
+              (((100 - pickerLeft) * (255 - this.pickerBackgroundBlue)) / 100 +
+                this.pickerBackgroundBlue)) /
+              100
+          );
+          this.green = Math.round(((100 - pickerLeft) * this.red) / 100);
+          break;
+      }
+
+      this.$refs.pickerPointer.style.left = `calc(${pickerLeft}% - 5px)`;
+      this.$refs.pickerPointer.style.top = `calc(${pickerTop}% - 5px)`;
+
+      this.color = this.rgbToHex(
+        this.red,
+        this.green,
+        this.blue,
+        this.alpha / 100
+      );
+
+      this.gradient.colors[this.barPointerIndex].hex = this.color;
+    },
+    mouseMovePicker(e) {
+      this.onMovePicker(e.clientX, e.clientY);
+    },
+    touchMovePicker(e) {
+      this.onMovePicker(e.touches[0].clientX, e.touches[0].clientY);
+    },
+    mouseUpPicker() {
+      this.$refs.picker.classList.remove("grabbing");
+      this.$refs.picker.removeEventListener("mousemove", this.mouseMovePicker);
+    },
+    touchEndPicker() {
+      this.$refs.picker.classList.remove("grabbing");
+      this.$refs.picker.removeEventListener("touchmove", this.touchMovePicker);
+    },
+    bindMovePicker() {
+      this.$refs.picker.addEventListener("mousemove", this.mouseMovePicker);
+      this.$refs.picker.addEventListener("mouseup", () => this.mouseUpPicker());
+    },
+    bindTouchPicker() {
+      this.$refs.picker.addEventListener("touchmove", this.touchMovePicker);
+      this.$refs.picker.addEventListener("touchend", () =>
+        this.touchEndPicker()
+      );
     },
   },
 };
@@ -461,10 +666,17 @@ export default {
           </div>
         </div>
       </div>
-      <div class="gpi-picker" :style="`background: ${color}`">
+      <div
+        class="gpi-picker"
+        @mousedown="onMouseDownPicker"
+        @touchstart="onTouchStartPicker"
+        :style="`background: rgb(${pickerBackgroundRed}, ${pickerBackgroundGreen}, ${pickerBackgroundBlue})`"
+        ref="picker"
+      >
         <div
           class="pointer"
           :style="`top: calc(${pickerTop}% - 5px); left: calc(${pickerLeft}% - 5px)`"
+          ref="pickerPointer"
         ></div>
         <div class="bg1"></div>
         <div class="bg2"></div>
@@ -478,14 +690,24 @@ export default {
           ></div>
         </div>
         <div class="gpi-hue-alpha">
-          <div class="gpi-hue" @mousedown="onMouseDownHue" ref="hue">
+          <div
+            class="gpi-hue"
+            @mousedown="onMouseDownHue"
+            @touchstart="onTouchStartHue"
+            ref="hue"
+          >
             <div
               class="pointer"
               :style="`left: calc(${hueLeft}% - 7px)`"
               ref="huePointer"
             ></div>
           </div>
-          <div class="gpi-alpha" @mousedown="onMouseDownAlpha" ref="alpha">
+          <div
+            class="gpi-alpha"
+            @mousedown="onMouseDownAlpha"
+            @touchstart="onTouchStartAlpha"
+            ref="alpha"
+          >
             <div
               class="pointer"
               :style="`left: calc(${alphaLeft}% - 7px)`"
