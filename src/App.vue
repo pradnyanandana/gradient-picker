@@ -479,7 +479,7 @@ export default {
       this.$refs.alpha.addEventListener("touchmove", this.touchMoveAlpha);
       this.$refs.alpha.addEventListener("touchend", () => this.touchEndAlpha());
     },
-    onnPickerStart() {
+    onPickerStart() {
       const picker = this.$refs.picker.getBoundingClientRect();
 
       this.pickerX = picker.x;
@@ -493,7 +493,7 @@ export default {
       e.preventDefault();
       e.stopPropagation();
 
-      this.onnPickerStart();
+      this.onPickerStart();
 
       this.mouseMovePicker(e);
       this.bindMovePicker();
@@ -502,7 +502,7 @@ export default {
       e.preventDefault();
       e.stopPropagation();
 
-      this.onnPickerStart();
+      this.onPickerStart();
 
       this.touchMovePicker(e);
       this.bindTouchPicker();
@@ -631,6 +631,233 @@ export default {
         this.touchEndPicker()
       );
     },
+    onGradientStart() {
+      this.$refs.picker.classList.add("grabbing");
+
+      const gradient =
+        this.$refs[
+          `gradient${this.barPointerIndex}`
+        ][0].parentElement.getBoundingClientRect();
+
+      this.gradientX = gradient.x;
+      this.gradientWidth = gradient.width;
+      this.$refs[`gradient${this.barPointerIndex}`][0].classList.add(
+        "grabbing"
+      );
+    },
+    onMouseDownGradient(e, index) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.barPointerIndex = index;
+      this.onGradientStart();
+
+      this.mouseMoveGradient(e);
+      this.bindMoveGradient();
+    },
+    onTouchStartGradient(e, index) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.barPointerIndex = index;
+      this.onGradientStart();
+
+      this.touchMoveGradient(e);
+      this.bindTouchGradient();
+    },
+    onMoveGradient(positionX) {
+      let gradeintLeft =
+        ((positionX - this.gradientX) / this.gradientWidth) * 100 +
+        (positionX - this.gradientX) / this.gradientWidth;
+
+      if (gradeintLeft > 100) {
+        gradeintLeft = 100;
+      }
+
+      if (gradeintLeft < 0) {
+        gradeintLeft = 0;
+      }
+
+      this.$refs[
+        `gradient${this.barPointerIndex}`
+      ][0].style.left = `calc(${gradeintLeft}% - 10px)`;
+
+      this.gradient.colors[this.barPointerIndex].stop = gradeintLeft;
+    },
+    mouseMoveGradient(e) {
+      this.onMoveGradient(e.clientX);
+    },
+    touchMoveGradient(e) {
+      this.onMoveGradient(e.touches[0].clientX);
+    },
+    mouseUpGradient() {
+      this.$refs[`gradient${this.barPointerIndex}`][0].classList.remove(
+        "grabbing"
+      );
+      this.$refs[`gradient${this.barPointerIndex}`][0].removeEventListener(
+        "mousemove",
+        this.mouseMoveGradient
+      );
+    },
+    touchEndGradient() {
+      this.$refs[`gradient${this.barPointerIndex}`][0].classList.remove(
+        "grabbing"
+      );
+      this.$refs[`gradient${this.barPointerIndex}`][0].removeEventListener(
+        "touchmove",
+        this.touchMoveGradient
+      );
+    },
+    bindMoveGradient() {
+      this.$refs[`gradient${this.barPointerIndex}`][0].addEventListener(
+        "mousemove",
+        this.mouseMoveGradient
+      );
+      this.$refs[`gradient${this.barPointerIndex}`][0].addEventListener(
+        "mouseup",
+        () => this.mouseUpGradient()
+      );
+    },
+    bindTouchGradient() {
+      this.$refs[`gradient${this.barPointerIndex}`][0].addEventListener(
+        "touchmove",
+        this.touchMoveGradient
+      );
+      this.$refs[`gradient${this.barPointerIndex}`][0].addEventListener(
+        "touchend",
+        () => this.touchEndGradient()
+      );
+    },
+    onAddGradient(e) {
+      // Click on bar, not pointer
+      if (e.target.innerHTML === this.$refs.gradientBar.innerHTML) {
+        // Find position
+        const positionX = e.clientX;
+        const gradient = this.$refs.gradientBar.getBoundingClientRect();
+
+        const gradientX = gradient.x;
+        const gradientWidth = gradient.width;
+
+        let gradientLeft =
+          ((positionX - gradientX) / gradientWidth) * 100 +
+          (positionX - gradientX) / gradientWidth;
+
+        if (gradientLeft > 100) {
+          gradientLeft = 100;
+        }
+
+        if (gradientLeft < 0) {
+          gradientLeft = 0;
+        }
+
+        // Find color
+        let minColorPos = 0,
+          minPointerPos = 100,
+          maxColorPos = 100,
+          maxPointerPos = 0;
+        let minColor, maxColor, minPointer, maxPointer;
+
+        this.gradient.colors.forEach((pointer) => {
+          const stopColor = pointer.stop;
+
+          if (stopColor >= minColorPos && stopColor < gradientLeft) {
+            minColorPos = stopColor;
+            minColor = pointer;
+          }
+
+          if (stopColor <= maxColorPos && stopColor > gradientLeft) {
+            maxColorPos = stopColor;
+            maxColor = pointer;
+          }
+
+          if (stopColor < minPointerPos) {
+            minPointer = pointer;
+            minPointerPos = stopColor;
+          }
+
+          if (stopColor > maxPointerPos) {
+            maxPointer = pointer;
+            maxPointerPos = stopColor;
+          }
+        });
+
+        if (minPointer && maxPointer) {
+          if (!minColor) {
+            this.color = minPointer.hex;
+          } else if (!maxColor) {
+            this.color = maxPointer.hex;
+          } else {
+            try {
+              const minRGB = this.hexToRgb(minColor.hex);
+              const maxRGB = this.hexToRgb(maxColor.hex);
+
+              const minStop = minColor.stop;
+              const maxStop = maxColor.stop;
+
+              const minAlpha = minRGB.alpha !== undefined ? minRGB.alpha : 1;
+              const maxAlpha = maxRGB.alpha !== undefined ? maxRGB.alpha : 1;
+
+              const colorRange = maxStop - minStop;
+              const colorRangeStart = gradientLeft - minStop;
+
+              // Pre define value, avoid divide by 0
+              let colorRed = minRGB.r;
+              let colorGreen = minRGB.g;
+              let colorBlue = minRGB.b;
+              let colorAlpha = minAlpha;
+
+              if (minRGB.r != maxRGB.r) {
+                colorRed =
+                  minRGB.r < maxRGB.r
+                    ? minRGB.r +
+                      (colorRangeStart / colorRange) * (maxRGB.r - minRGB.r)
+                    : minRGB.r -
+                      (colorRangeStart / colorRange) * (minRGB.r - maxRGB.r);
+              }
+
+              if (minRGB.g != maxRGB.g) {
+                colorGreen =
+                  minRGB.g < maxRGB.g
+                    ? minRGB.g +
+                      (colorRangeStart / colorRange) * (maxRGB.g - minRGB.g)
+                    : minRGB.g -
+                      (colorRangeStart / colorRange) * (minRGB.g - maxRGB.g);
+              }
+
+              if (minRGB.b != maxRGB.b) {
+                colorBlue =
+                  minRGB.b < maxRGB.b
+                    ? minRGB.b +
+                      (colorRangeStart / colorRange) * (maxRGB.b - minRGB.b)
+                    : minRGB.b -
+                      (colorRangeStart / colorRange) * (minRGB.b - maxRGB.b);
+              }
+
+              if (minAlpha != maxAlpha) {
+                colorAlpha =
+                  minAlpha < maxAlpha
+                    ? minAlpha +
+                      (colorRangeStart / colorRange) * (maxAlpha - minAlpha)
+                    : minAlpha -
+                      (colorRangeStart / colorRange) * (minAlpha - maxAlpha);
+              }
+
+              this.color = this.rgbToHex(
+                colorRed,
+                colorGreen,
+                colorBlue,
+                colorAlpha
+              );
+            } catch (e) {}
+          }
+        }
+
+        this.gradient.colors.push({
+          hex: this.color,
+          stop: Math.round(gradientLeft),
+        });
+      }
+    },
   },
 };
 </script>
@@ -646,13 +873,20 @@ export default {
             class="gpi-gradient-bar-background"
             :style="`background: ${gradientBarBackground(gradient)}`"
           ></div>
-          <div class="gpi-gradient-bar-pointer">
+          <div
+            class="gpi-gradient-bar-pointer"
+            @click="onAddGradient"
+            ref="gradientBar"
+          >
             <div
               v-for="(color, index) in gradient.colors"
               :key="index"
               @click="clickBarPointer(index)"
+              @mousedown="(e) => onMouseDownGradient(e, index)"
+              @touchstart="(e) => onTouchStartGradient(e, index)"
               :class="`pointer ${index === barPointerIndex ? 'active' : ''}`"
               :style="`left: calc(${color.stop}%  - 10px)`"
+              :ref="`gradient${index}`"
             >
               <div class="pointer-color">
                 <div class="pointer-color-transparent"></div>
