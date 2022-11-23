@@ -14,7 +14,8 @@
     "gh-pages": "^4.0.0",
     "pinia": "^2.0.23",
     "prismjs": "^1.29.0",
-    "vue": "^3.2.41"
+    "vue": "^3.2.41",
+    "vue-feather": "^2.0.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",

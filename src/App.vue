@@ -84,7 +84,7 @@ export default {
     gradientBarBackground({ colors }) {
       let colorObj = [];
 
-      colors
+      [...colors]
         .sort((a, b) => a.stop - b.stop)
         .forEach((color) => {
           colorObj.push(`${color.hex} ${color.stop}%`);
@@ -249,6 +249,9 @@ export default {
       } catch (err) {
         console.log(err.message);
       }
+    },
+    removeGradientPointer(index) {
+      this.gradient.colors.splice(index, 1);
     },
     onHueStart() {
       const hue = this.$refs.hue.getBoundingClientRect();
@@ -479,6 +482,21 @@ export default {
       this.$refs.alpha.addEventListener("touchmove", this.touchMoveAlpha);
       this.$refs.alpha.addEventListener("touchend", () => this.touchEndAlpha());
     },
+    onChangeAlpha(e) {
+      let value = e.target.value;
+
+      if (value > 100) {
+        value = 100;
+      }
+
+      if (value < 0) {
+        value = 0;
+      }
+
+      this.color = this.rgbToHex(this.red, this.green, this.blue, value / 100);
+
+      this.gradient.colors[this.barPointerIndex].hex = this.color;
+    },
     onPickerStart() {
       const picker = this.$refs.picker.getBoundingClientRect();
 
@@ -677,10 +695,6 @@ export default {
       if (gradeintLeft < 0) {
         gradeintLeft = 0;
       }
-
-      this.$refs[
-        `gradient${this.barPointerIndex}`
-      ][0].style.left = `calc(${gradeintLeft}% - 10px)`;
 
       this.gradient.colors[this.barPointerIndex].stop = gradeintLeft;
     },
@@ -894,6 +908,13 @@ export default {
                   class="pointer-color-inner"
                   :style="`background: ${color.hex};`"
                 ></div>
+                <div
+                  v-if="gradient.colors.length > 2"
+                  class="remove"
+                  @click="removeGradientPointer(index)"
+                >
+                  <vue-feather type="trash" size="15"></vue-feather>
+                </div>
               </div>
               <div class="pointer-arrow"></div>
             </div>
@@ -962,9 +983,14 @@ export default {
         <span class="gpi-hex-title">{{ color }}</span>
         <div class="gpi-hex-input">
           <input
-            type="text"
+            type="number"
+            min="0"
+            max="100"
+            step="1"
             class="gpi-hex-input-value"
             :value="`${(hexToRgb(color).alpha || 1) * 100}`"
+            @input="onChangeAlpha"
+            @change="onChangeAlpha"
           />
           <span class="gpi-hex-input-percent">%</span>
         </div>
