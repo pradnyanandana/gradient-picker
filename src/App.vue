@@ -55,15 +55,9 @@ export default {
       JSON.stringify(computed(() => main.getAllGradients).value)
     );
 
-    this.gradient = this.gradients[0] || {
-      type: "linear",
-      lineardegree: 90,
-      radialposition: "center center",
-      colors: [
-        { hex: "#40c9ff", stop: 0 },
-        { hex: "#e81cff", stop: 100 },
-      ],
-    };
+    if (this.gradients[0]) {
+      this.gradient = { ...this.gradients[0] };
+    }
 
     this.color = this.gradient.colors?.[this.barPointerIndex]?.hex || "#40c9ff";
     this.pointerPosition();
@@ -97,9 +91,11 @@ export default {
       let colorObj = [];
 
       if (colors) {
-        colors.forEach((color) => {
-          colorObj.push(`${color.hex} ${color.stop}%`);
-        });
+        [...colors]
+          .sort((a, b) => a.stop - b.stop)
+          .forEach((color) => {
+            colorObj.push(`${color.hex} ${color.stop}%`);
+          });
       }
 
       if (type === "linear") {
@@ -895,12 +891,17 @@ export default {
             <div
               v-for="(color, index) in gradient.colors"
               :key="index"
-              @click="clickBarPointer(index)"
-              @mousedown="(e) => onMouseDownGradient(e, index)"
-              @touchstart="(e) => onTouchStartGradient(e, index)"
               :class="`pointer ${index === barPointerIndex ? 'active' : ''}`"
               :style="`left: calc(${color.stop}%  - 10px)`"
               :ref="`gradient${index}`"
+              @click="clickBarPointer(index)"
+              @mousedown="(e) => onMouseDownGradient(e, index)"
+              @touchstart="
+                (e) => {
+                  clickBarPointer(index);
+                  onTouchStartGradient(e, index);
+                }
+              "
             >
               <div class="pointer-color">
                 <div class="pointer-color-transparent"></div>
