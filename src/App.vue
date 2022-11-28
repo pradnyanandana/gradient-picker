@@ -392,19 +392,19 @@ export default {
     },
     mouseUpHue() {
       this.$refs.hue.classList.remove("grabbing");
-      this.$refs.hue.removeEventListener("mousemove", this.mouseMoveHue);
+      window.removeEventListener("mousemove", this.mouseMoveHue);
     },
     touchEndHue() {
       this.$refs.hue.classList.remove("grabbing");
-      this.$refs.hue.removeEventListener("touchmove", this.mouseMoveHue);
+      window.removeEventListener("touchmove", this.mouseMoveHue);
     },
     bindMoveHue() {
-      this.$refs.hue.addEventListener("mousemove", this.mouseMoveHue);
-      this.$refs.hue.addEventListener("mouseup", () => this.mouseUpHue());
+      window.addEventListener("mousemove", this.mouseMoveHue);
+      window.addEventListener("mouseup", () => this.mouseUpHue());
     },
     bindTouchMoveHue() {
-      this.$refs.hue.addEventListener("touchmove", this.touchMoveHue);
-      this.$refs.hue.addEventListener("touchend", () => this.touchEndHue());
+      window.addEventListener("touchmove", this.touchMoveHue);
+      window.addEventListener("touchend", () => this.touchEndHue());
     },
     onAlphaStart() {
       const alpha = this.$refs.alpha.getBoundingClientRect();
@@ -464,19 +464,19 @@ export default {
     },
     mouseUpAlpha() {
       this.$refs.alpha.classList.remove("grabbing");
-      this.$refs.alpha.removeEventListener("mousemove", this.mouseMoveAlpha);
+      window.removeEventListener("mousemove", this.mouseMoveAlpha);
     },
     touchEndAlpha() {
       this.$refs.alpha.classList.remove("grabbing");
-      this.$refs.alpha.removeEventListener("touchmove", this.touchMoveAlpha);
+      window.removeEventListener("touchmove", this.touchMoveAlpha);
     },
     bindMoveAlpha() {
-      this.$refs.alpha.addEventListener("mousemove", this.mouseMoveAlpha);
-      this.$refs.alpha.addEventListener("mouseup", () => this.mouseUpAlpha());
+      window.addEventListener("mousemove", this.mouseMoveAlpha);
+      window.addEventListener("mouseup", () => this.mouseUpAlpha());
     },
     bindTouchAlpha() {
-      this.$refs.alpha.addEventListener("touchmove", this.touchMoveAlpha);
-      this.$refs.alpha.addEventListener("touchend", () => this.touchEndAlpha());
+      window.addEventListener("touchmove", this.touchMoveAlpha);
+      window.addEventListener("touchend", () => this.touchEndAlpha());
     },
     onChangeAlpha(e) {
       let value = e.target.value;
@@ -490,8 +490,8 @@ export default {
       }
 
       this.color = this.rgbToHex(this.red, this.green, this.blue, value / 100);
-
       this.gradient.colors[this.barPointerIndex].hex = this.color;
+      this.$refs.alphaPointer.style.left = `calc(${value}% - 7px)`;
     },
     onPickerStart() {
       const picker = this.$refs.picker.getBoundingClientRect();
@@ -704,39 +704,21 @@ export default {
       this.$refs[`gradient${this.barPointerIndex}`][0].classList.remove(
         "grabbing"
       );
-      this.$refs[`gradient${this.barPointerIndex}`][0].removeEventListener(
-        "mousemove",
-        this.mouseMoveGradient
-      );
+      window.removeEventListener("mousemove", this.mouseMoveGradient);
     },
     touchEndGradient() {
       this.$refs[`gradient${this.barPointerIndex}`][0].classList.remove(
         "grabbing"
       );
-      this.$refs[`gradient${this.barPointerIndex}`][0].removeEventListener(
-        "touchmove",
-        this.touchMoveGradient
-      );
+      window.removeEventListener("touchmove", this.touchMoveGradient);
     },
     bindMoveGradient() {
-      this.$refs[`gradient${this.barPointerIndex}`][0].addEventListener(
-        "mousemove",
-        this.mouseMoveGradient
-      );
-      this.$refs[`gradient${this.barPointerIndex}`][0].addEventListener(
-        "mouseup",
-        () => this.mouseUpGradient()
-      );
+      window.addEventListener("mousemove", this.mouseMoveGradient);
+      window.addEventListener("mouseup", () => this.mouseUpGradient());
     },
     bindTouchGradient() {
-      this.$refs[`gradient${this.barPointerIndex}`][0].addEventListener(
-        "touchmove",
-        this.touchMoveGradient
-      );
-      this.$refs[`gradient${this.barPointerIndex}`][0].addEventListener(
-        "touchend",
-        () => this.touchEndGradient()
-      );
+      window.addEventListener("touchmove", this.touchMoveGradient);
+      window.addEventListener("touchend", () => this.touchEndGradient());
     },
     onAddGradient(e) {
       // Click on bar, not pointer
