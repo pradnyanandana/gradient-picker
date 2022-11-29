@@ -23,8 +23,8 @@ export default {
         lineardegree: 90,
         radialposition: "center center",
         colors: [
-          { hex: "#40c9ff", stop: 0 },
-          { hex: "#e81cff", stop: 100 },
+          { rgb: { r: 64, g: 201, b: 255, alpha: 1 }, stop: 0 },
+          { rgb: { r: 232, g: 28, b: 255, alpha: 1 }, stop: 100 },
         ],
       },
       gradients: [],
@@ -59,7 +59,10 @@ export default {
       this.gradient = { ...this.gradients[0] };
     }
 
-    this.color = this.gradient.colors?.[this.barPointerIndex]?.hex || "#40c9ff";
+    this.color = this.gradient.colors?.[this.barPointerIndex]?.rgb || {
+      rgb: { r: 64, g: 201, b: 255, alpha: 1 },
+      stop: 0,
+    };
     this.pointerPosition();
   },
   methods: {
@@ -69,7 +72,7 @@ export default {
 
       return rgb;
     },
-    rgbToHex(r, g, b, alpha = 1) {
+    rgbToHex({ r, g, b, alpha = 1 }) {
       const color = Color({ r, g, b }).alpha(alpha);
       const hex = alpha < 1 ? color.hexa() : color.hex();
 
@@ -81,7 +84,7 @@ export default {
       [...colors]
         .sort((a, b) => a.stop - b.stop)
         .forEach((color) => {
-          colorObj.push(`${color.hex} ${color.stop}%`);
+          colorObj.push(`${this.rgbToHex(color.rgb)} ${color.stop}%`);
         });
 
       return `linear-gradient(90deg, ${colorObj.join()})`;
@@ -94,7 +97,7 @@ export default {
         [...colors]
           .sort((a, b) => a.stop - b.stop)
           .forEach((color) => {
-            colorObj.push(`${color.hex} ${color.stop}%`);
+            colorObj.push(`${this.rgbToHex(color.rgb)} ${color.stop}%`);
           });
       }
 
@@ -110,14 +113,16 @@ export default {
     },
     clickBarPointer(index) {
       this.barPointerIndex = index;
-      this.color =
-        this.gradient.colors?.[this.barPointerIndex]?.hex || "#40c9ff";
+      this.color = this.gradient.colors?.[this.barPointerIndex]?.rgb || {
+        rgb: { r: 64, g: 201, b: 255, alpha: 1 },
+        stop: 0,
+      };
       this.pointerPosition();
     },
     pointerPosition() {
       try {
         const area = 100 / 6;
-        const obj = this.hexToRgb(this.color);
+        const obj = this.color;
         const alpha = obj.alpha !== undefined ? obj.alpha * 100 : 100;
         const rgb = Object.keys(obj)
           .filter((key) => ["r", "g", "b"].includes(key))
@@ -375,14 +380,14 @@ export default {
 
       this.$refs.huePointer.style.left = `calc(${hueLeft}% - 7px)`;
 
-      this.color = this.rgbToHex(
-        this.red,
-        this.green,
-        this.blue,
-        this.alpha / 100
-      );
+      this.color = {
+        r: this.red,
+        g: this.green,
+        b: this.blue,
+        alpha: this.alpha / 100,
+      };
 
-      this.gradient.colors[this.barPointerIndex].hex = this.color;
+      this.gradient.colors[this.barPointerIndex].rgb = this.color;
     },
     mouseMoveHue(e) {
       this.onHueMove(e.clientX);
@@ -396,7 +401,7 @@ export default {
     },
     touchEndHue() {
       this.$refs.hue.classList.remove("grabbing");
-      window.removeEventListener("touchmove", this.mouseMoveHue);
+      window.removeEventListener("touchmove", this.touchMoveHue);
     },
     bindMoveHue() {
       window.addEventListener("mousemove", this.mouseMoveHue);
@@ -447,14 +452,14 @@ export default {
       this.alpha = Math.round(alphaLeft);
       this.$refs.alphaPointer.style.left = `calc(${alphaLeft}% - 7px)`;
 
-      this.color = this.rgbToHex(
-        this.red,
-        this.green,
-        this.blue,
-        this.alpha / 100
-      );
+      this.color = {
+        r: this.red,
+        g: this.green,
+        b: this.blue,
+        alpha: this.alpha / 100,
+      };
 
-      this.gradient.colors[this.barPointerIndex].hex = this.color;
+      this.gradient.colors[this.barPointerIndex].rgb = this.color;
     },
     mouseMoveAlpha(e) {
       this.onMoveAlpha(e.clientX);
@@ -489,8 +494,13 @@ export default {
         value = 0;
       }
 
-      this.color = this.rgbToHex(this.red, this.green, this.blue, value / 100);
-      this.gradient.colors[this.barPointerIndex].hex = this.color;
+      this.color = {
+        r: this.red,
+        g: this.green,
+        b: this.blue,
+        alpha: value / 100,
+      };
+      this.gradient.colors[this.barPointerIndex].rgb = this.color;
       this.$refs.alphaPointer.style.left = `calc(${value}% - 7px)`;
     },
     onPickerStart() {
@@ -612,14 +622,14 @@ export default {
       this.$refs.pickerPointer.style.left = `calc(${pickerLeft}% - 5px)`;
       this.$refs.pickerPointer.style.top = `calc(${pickerTop}% - 5px)`;
 
-      this.color = this.rgbToHex(
-        this.red,
-        this.green,
-        this.blue,
-        this.alpha / 100
-      );
+      this.color = {
+        r: this.red,
+        g: this.green,
+        b: this.blue,
+        alpha: this.alpha / 100,
+      };
 
-      this.gradient.colors[this.barPointerIndex].hex = this.color;
+      this.gradient.colors[this.barPointerIndex].rgb = this.color;
     },
     mouseMovePicker(e) {
       this.onMovePicker(e.clientX, e.clientY);
@@ -775,13 +785,13 @@ export default {
 
         if (minPointer && maxPointer) {
           if (!minColor) {
-            this.color = minPointer.hex;
+            this.color = minPointer.rgb;
           } else if (!maxColor) {
-            this.color = maxPointer.hex;
+            this.color = maxPointer.rgb;
           } else {
             try {
-              const minRGB = this.hexToRgb(minColor.hex);
-              const maxRGB = this.hexToRgb(maxColor.hex);
+              const minRGB = minColor.rgb;
+              const maxRGB = maxColor.rgb;
 
               const minStop = minColor.stop;
               const maxStop = maxColor.stop;
@@ -834,18 +844,18 @@ export default {
                       (colorRangeStart / colorRange) * (minAlpha - maxAlpha);
               }
 
-              this.color = this.rgbToHex(
-                colorRed,
-                colorGreen,
-                colorBlue,
-                colorAlpha
-              );
+              this.color = {
+                r: colorRed,
+                g: colorGreen,
+                b: colorBlue,
+                alpha: colorAlpha,
+              };
             } catch (e) {}
           }
         }
 
         this.gradient.colors.push({
-          hex: this.color,
+          rgb: this.color,
           stop: Math.round(gradientLeft),
         });
       }
@@ -889,7 +899,7 @@ export default {
                 <div class="pointer-color-transparent"></div>
                 <div
                   class="pointer-color-inner"
-                  :style="`background: ${color.hex};`"
+                  :style="`background: ${this.rgbToHex(color.rgb)};`"
                 ></div>
                 <div
                   v-if="gradient.colors.length > 2"
@@ -924,7 +934,7 @@ export default {
           <div class="gpi-preview-transparent"></div>
           <div
             class="gpi-preview-background"
-            :style="`background: ${color}`"
+            :style="`background: ${rgbToHex(color)}`"
           ></div>
         </div>
         <div class="gpi-hue-alpha">
@@ -954,16 +964,20 @@ export default {
             <div
               class="bg"
               :style="`background-image: linear-gradient(
-                to left,
-                ${color} 0%,
-                rgba(9, 9, 121, 0) 100%
-              );`"
+                          to left,
+                          ${rgbToHex({
+                            r: color.r,
+                            g: color.g,
+                            b: color.b,
+                          })} 0%,
+                          rgba(9, 9, 121, 0) 100%
+                        );`"
             ></div>
           </div>
         </div>
       </div>
       <div class="gpi-hex">
-        <span class="gpi-hex-title">{{ color }}</span>
+        <span class="gpi-hex-title">{{ rgbToHex(color) }}</span>
         <div class="gpi-hex-input">
           <input
             type="number"
@@ -972,7 +986,6 @@ export default {
             step="1"
             class="gpi-hex-input-value"
             :value="`${(hexToRgb(color).alpha || 1) * 100}`"
-            @input="onChangeAlpha"
             @change="onChangeAlpha"
           />
           <span class="gpi-hex-input-percent">%</span>
