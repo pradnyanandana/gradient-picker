@@ -14,10 +14,10 @@ export default {
       pickerTop: 100,
       pickerLeft: 0,
       barPointerIndex: 0,
-      color: "#fff",
       pickerBackgroundRed: 255,
       pickerBackgroundGreen: 0,
       pickerBackgroundBlue: 0,
+      color: { r: 64, g: 201, b: 255, alpha: 1 },
       gradient: {
         type: "linear",
         lineardegree: 90,
@@ -34,7 +34,7 @@ export default {
     const main = useMainStore();
 
     return {
-      addGradient: () => {},
+      addGradient: main.addGradient,
       removeGradient: main.removeGradient,
       isEmpty: computed(() => main.isEmpty),
     };
@@ -60,8 +60,10 @@ export default {
     }
 
     this.color = this.gradient.colors?.[this.barPointerIndex]?.rgb || {
-      rgb: { r: 64, g: 201, b: 255, alpha: 1 },
-      stop: 0,
+      r: 64,
+      g: 201,
+      b: 255,
+      alpha: 1,
     };
     this.pointerPosition();
   },
@@ -77,6 +79,23 @@ export default {
       const hex = alpha < 1 ? color.hexa() : color.hex();
 
       return hex;
+    },
+    changeType(type) {
+      this.gradient.type = type;
+    },
+    changeRadial(e) {
+      this.gradient.radialposition = e.target.value;
+    },
+    changeLinearDegree(e) {
+      this.gradient.lineardegree = e.target.value;
+    },
+    saveGradient() {
+      const gradient = JSON.parse(
+        JSON.stringify(computed(() => this.gradient).value)
+      );
+
+      this.addGradient(gradient);
+      this.gradients.unshift(gradient);
     },
     gradientBarBackground({ colors }) {
       let colorObj = [];
@@ -914,6 +933,55 @@ export default {
           </div>
         </div>
       </div>
+      <div class="gpi-type">
+        <div class="options">
+          <div
+            :class="`option-linear ${
+              gradient.type === 'linear' ? 'active' : ''
+            }`"
+            @click="changeType('linear')"
+          >
+            <div></div>
+          </div>
+          <div
+            :class="`option-radial ${
+              gradient.type === 'radial' ? 'active' : ''
+            }`"
+            @click="changeType('radial')"
+          >
+            <div></div>
+          </div>
+        </div>
+        <div class="input">
+          <span v-if="gradient.type === 'radial'">Radial Position:</span>
+          <span v-if="gradient.type === 'linear'">Linear Degree:</span>
+
+          <select
+            @change="changeRadial"
+            :value="gradient.radialposition"
+            v-if="gradient.type === 'radial'"
+          >
+            <option value="center center">Center Center</option>
+            <option value="center left">Center Left</option>
+            <option value="center right">Center Right</option>
+            <option value="top center">Top Center</option>
+            <option value="top left">Top Left</option>
+            <option value="top right">Top Right</option>
+            <option value="bottom center">Bottom Center</option>
+            <option value="bottom left">Bottom Left</option>
+            <option value="bottom right">Bottom Right</option>
+          </select>
+          <input
+            v-if="gradient.type === 'linear'"
+            type="number"
+            min="0"
+            max="360"
+            step="1"
+            :value="`${gradient.lineardegree}`"
+            @change="changeLinearDegree"
+          />
+        </div>
+      </div>
       <div
         class="gpi-picker"
         @mousedown="onMouseDownPicker"
@@ -985,14 +1053,14 @@ export default {
             max="100"
             step="1"
             class="gpi-hex-input-value"
-            :value="`${(hexToRgb(color).alpha || 1) * 100}`"
+            :value="`${color.alpha * 100}`"
             @change="onChangeAlpha"
           />
           <span class="gpi-hex-input-percent">%</span>
         </div>
       </div>
       <div class="gpi-saved-button">
-        <button>Save Gradient</button>
+        <button @click="saveGradient">Save Gradient</button>
       </div>
       <div class="gpi-saved-gradients">
         <p>Saved Gradients</p>

@@ -292,22 +292,22 @@ h1.site-title {
 }
 
 .gpi-gradient .gpi-gradient-bar .pointer-color .remove {
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 5px);
-    line-height: 0;
-    padding: 2px;
-    border-radius: 2px;
-    transform: translateX(-50%);
-    color: #000;
-    background-color: #ccc;
-    opacity: 0;
-    visibility: hidden;
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 5px);
+  line-height: 0;
+  padding: 2px;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  color: #000;
+  background-color: #ccc;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .gpi-gradient .gpi-gradient-bar .pointer.active .pointer-color .remove {
-    opacity: 1;
-    visibility: visible;
+  opacity: 1;
+  visibility: visible;
 }
 
 .gpi-gradient .gpi-gradient-bar .pointer-color-inner,
@@ -425,4 +425,88 @@ h1.site-title {
 
 .gpi-generated-code pre {
   margin-top: 30px;
+}
+
+.gpi-type {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.gpi-type .options {
+  display: flex;
+  gap: 30px;
+}
+
+.gpi-type .options > div {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(50% - 10px);
+  border: 1px solid #edeff1;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.gpi-type .options > div:hover,
+.gpi-type .options > div.active {
+  border-color: black;
+}
+
+.gpi-type .options > div > div {
+  width: 46px;
+  height: 46px;
+  border-radius: 3px;
+  background-color: #000;
+}
+
+.gpi-type .options > .option-linear > div {
+  background: linear-gradient(90deg, #40c9ff 0%, #e81cff 100%);
+}
+
+.gpi-type .options > .option-radial > div {
+  background: radial-gradient(circle at center, #40c9ff 0, #e81cff 100%);
+}
+
+.gpi-type .input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gpi-type .input input,
+.gpi-type .input select {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 8px 10px;
+  text-align: right;
+  border-radius: 3px 0 0 3px;
+  color: #4d596b;
+  border: 1px solid #edeff1;
+  transition: border 0.3s ease;
+}
+
+.gpi-type .input span {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  color: #4d596b;
+}
+
+@media screen and (max-width: 450px) {
+  .gpi-type {
+    flex-direction: column;
+  }
+
+  .gpi-type .options {
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+
+  .gpi-type .input {
+    justify-content: center;
+  }
 }

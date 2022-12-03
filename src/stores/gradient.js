@@ -16,7 +16,7 @@ export const useMainStore = defineStore({
   },
   actions: {
     addGradient(gradient) {
-      this.gradients.push(gradient);
+      this.gradients.unshift(gradient);
     },
     removeGradient(index) {
       this.gradients.splice(index, 1);
