@@ -28,6 +28,8 @@ export default {
         ],
       },
       gradients: [],
+      pressGradient: null,
+      pressSaved: null,
     };
   },
   setup() {
@@ -56,15 +58,15 @@ export default {
     );
 
     if (this.gradients[0]) {
-      this.gradient = { ...this.gradients[0] };
+      this.gradient = JSON.parse(
+        JSON.stringify(computed(() => this.gradients[0]).value)
+      );
     }
 
-    this.color = this.gradient.colors?.[this.barPointerIndex]?.rgb || {
-      r: 64,
-      g: 201,
-      b: 255,
-      alpha: 1,
-    };
+    if (this.gradient.colors?.[this.barPointerIndex]?.rgb) {
+      this.color = { ...this.gradient.colors[this.barPointerIndex].rgb };
+    }
+
     this.pointerPosition();
   },
   methods: {
@@ -88,6 +90,19 @@ export default {
     },
     changeLinearDegree(e) {
       this.gradient.lineardegree = e.target.value;
+    },
+    changeGradient(index) {
+      if (this.gradients[index]) {
+        this.gradient = JSON.parse(
+          JSON.stringify(computed(() => this.gradients[index]).value)
+        );
+      }
+
+      if (this.gradient.colors?.[0]?.rgb) {
+        this.color = { ...this.gradient.colors[0].rgb };
+      }
+
+      this.pointerPosition();
     },
     saveGradient() {
       const gradient = JSON.parse(
@@ -272,6 +287,10 @@ export default {
     },
     removeGradientPointer(index) {
       this.gradient.colors.splice(index, 1);
+    },
+    removeGradientSaved(index) {
+      this.removeGradient(index);
+      this.gradients.splice(index, 1);
     },
     onHueStart() {
       const hue = this.$refs.hue.getBoundingClientRect();
@@ -941,7 +960,13 @@ export default {
             }`"
             @click="changeType('linear')"
           >
-            <div></div>
+            <div
+              :style="`background: ${buildCode({
+                ...this.gradient,
+                type: 'linear',
+                lineardegree: 90,
+              })}`"
+            ></div>
           </div>
           <div
             :class="`option-radial ${
@@ -949,7 +974,13 @@ export default {
             }`"
             @click="changeType('radial')"
           >
-            <div></div>
+            <div
+              :style="`background: ${buildCode({
+                ...this.gradient,
+                type: 'radial',
+                radialposition: 'center center',
+              })}`"
+            ></div>
           </div>
         </div>
         <div class="input">
@@ -1066,11 +1097,16 @@ export default {
         <p>Saved Gradients</p>
         <div v-if="!isEmpty" class="saved-items">
           <div
-            v-for="(gradient, index) in gradients"
-            :key="index"
             class="saved-item"
+            v-for="(gradient, index) in gradients"
+            @click="() => changeGradient(index)"
+            :key="index"
             :style="`background: ${buildCode(gradient)};`"
-          ></div>
+          >
+            <div class="remove" @click="removeGradientSaved(index)">
+              <vue-feather type="trash" size="15"></vue-feather>
+            </div>
+          </div>
         </div>
         <p v-else class="saved-items not-found">No gradient found</p>
       </div>
