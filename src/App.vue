@@ -1,8 +1,8 @@
 <script>
 import Prism from "prismjs";
-import Color from "color";
 import { computed } from "vue";
 import { useMainStore } from "./stores/gradient";
+import { gradientBarBackground, rgbToHex, buildCode } from "./app";
 
 import "prismjs/themes/prism.css";
 
@@ -70,18 +70,9 @@ export default {
     this.pointerPosition();
   },
   methods: {
-    hexToRgb(hex) {
-      const color = Color(hex);
-      const rgb = color.object();
-
-      return rgb;
-    },
-    rgbToHex({ r, g, b, alpha = 1 }) {
-      const color = Color({ r, g, b }).alpha(alpha);
-      const hex = alpha < 1 ? color.hexa() : color.hex();
-
-      return hex;
-    },
+    rgbToHex,
+    gradientBarBackground,
+    buildCode,
     changeType(type) {
       this.gradient.type = type;
     },
@@ -111,39 +102,6 @@ export default {
 
       this.addGradient(gradient);
       this.gradients.unshift(gradient);
-    },
-    gradientBarBackground({ colors }) {
-      let colorObj = [];
-
-      [...colors]
-        .sort((a, b) => a.stop - b.stop)
-        .forEach((color) => {
-          colorObj.push(`${this.rgbToHex(color.rgb)} ${color.stop}%`);
-        });
-
-      return `linear-gradient(90deg, ${colorObj.join()})`;
-    },
-    buildCode({ type, colors, lineardegree, radialposition }) {
-      let output;
-      let colorObj = [];
-
-      if (colors) {
-        [...colors]
-          .sort((a, b) => a.stop - b.stop)
-          .forEach((color) => {
-            colorObj.push(`${this.rgbToHex(color.rgb)} ${color.stop}%`);
-          });
-      }
-
-      if (type === "linear") {
-        output = `linear-gradient(${
-          lineardegree || 90
-        }deg, ${colorObj.join()})`;
-      } else {
-        output = `radial-gradient(at ${radialposition}, ${colorObj.join()})`;
-      }
-
-      return output;
     },
     clickBarPointer(index) {
       this.barPointerIndex = index;
@@ -287,6 +245,10 @@ export default {
     },
     removeGradientPointer(index) {
       this.gradient.colors.splice(index, 1);
+
+      if (this.barPointerIndex >= index) {
+        this.clickBarPointer(index - 1);
+      }
     },
     removeGradientSaved(index) {
       this.removeGradient(index);
@@ -937,7 +899,7 @@ export default {
                 <div class="pointer-color-transparent"></div>
                 <div
                   class="pointer-color-inner"
-                  :style="`background: ${this.rgbToHex(color.rgb)};`"
+                  :style="`background: ${rgbToHex(color.rgb)};`"
                 ></div>
                 <div
                   v-if="gradient.colors.length > 2"
