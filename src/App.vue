@@ -904,7 +904,12 @@ export default {
                 <div
                   v-if="gradient.colors.length > 2"
                   class="remove"
-                  @click="removeGradientPointer(index)"
+                  @click="
+                    (e) => {
+                      e.stopPropagation();
+                      removeGradientPointer(index);
+                    }
+                  "
                 >
                   <vue-feather type="trash" size="15"></vue-feather>
                 </div>
