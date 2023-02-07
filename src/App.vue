@@ -243,7 +243,8 @@ export default {
         console.log(err.message);
       }
     },
-    removeGradientPointer(index) {
+    removeGradientPointer() {
+      const index = this.barPointerIndex;
       this.gradient.colors.splice(index, 1);
 
       if (this.barPointerIndex >= index) {
@@ -888,12 +889,7 @@ export default {
               :ref="`gradient${index}`"
               @click="clickBarPointer(index)"
               @mousedown="(e) => onMouseDownGradient(e, index)"
-              @touchstart="
-                (e) => {
-                  clickBarPointer(index);
-                  onTouchStartGradient(e, index);
-                }
-              "
+              @touchstart="(e) => onTouchStartGradient(e, index)"
             >
               <div class="pointer-color">
                 <div class="pointer-color-transparent"></div>
@@ -901,22 +897,17 @@ export default {
                   class="pointer-color-inner"
                   :style="`background: ${rgbToHex(color.rgb)};`"
                 ></div>
-                <div
-                  v-if="gradient.colors.length > 2"
-                  class="remove"
-                  @click="
-                    (e) => {
-                      e.stopPropagation();
-                      removeGradientPointer(index);
-                    }
-                  "
-                >
-                  <vue-feather type="trash" size="15"></vue-feather>
-                </div>
               </div>
               <div class="pointer-arrow"></div>
             </div>
           </div>
+          <p
+            :class="`remove ${gradient.colors.length > 2 ? 'active' : ''}`"
+            @click="removeGradientPointer()"
+          >
+            Remove Active Picker
+            <vue-feather type="trash" size="14"></vue-feather>
+          </p>
         </div>
       </div>
       <div class="gpi-type">
